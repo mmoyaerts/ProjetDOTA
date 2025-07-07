@@ -1,8 +1,7 @@
 <template>
-  <MatchStream />
+  <router-view />
 </template>
 
 <script setup>
-import MatchStream from './components/MatchHistory.vue'
-
+// aucun script
 </script>
