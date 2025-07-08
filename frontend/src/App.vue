@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-
+// aucun script
 </script>
