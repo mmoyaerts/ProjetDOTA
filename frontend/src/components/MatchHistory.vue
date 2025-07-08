@@ -8,16 +8,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const props = defineProps({
-  accountId: { type: String, required: true },
-  scriptName: { type: String, required: true }
-})
+// const props = defineProps({
+//   accountId: { type: String, required: true },
+//   scriptName: { type: String, required: true }
+// })
 
 const output = ref('')
-
+const idTest = '365939353'
+const nomProduceur = 'producteurRecentMatch.py'
 onMounted(() => {
   const socket = new WebSocket(
-    `ws://localhost:8080/ws/match-stream?script=${props.scriptName}&accountId=${props.accountId}`
+    `ws://localhost:8080/ws/match-stream?script=${nomProduceur}&accountId=${idTest}`
   )
 
   socket.onopen = () => console.log('✅ WS connecté')
