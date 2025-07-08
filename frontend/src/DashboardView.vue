@@ -55,12 +55,11 @@ const router     = useRouter()
 const pros       = ref([])
 const matches    = ref([])
 const liveUpdate = ref('')
-let socket       = null
 
 onMounted(async () => {
   // 1) Charger la liste des pros (JSON simple via proxy Vite)
   try {
-    const res = await axios.get('/pros')
+    const res = await axios.get('http://localhost:8080/pros', { withCredentials: true })
     pros.value = res.data.map(p => ({
       id:   p.idSteam,
       name: p.pseudo
@@ -70,19 +69,15 @@ onMounted(async () => {
     console.error('❌ Erreur récupération des pros :', e)
   }
 
-  // 2) Charger les matchs en cours
-  try {
-    const res = await axios.get('/matches/ongoing')
-    const body = res.data
-    matches.value = Array.isArray(body.content)
-      ? body.content
-      : (Array.isArray(body) ? body : [])
-  } catch (e) {
-    console.error('❌ Erreur récupération des matchs :', e)
-  }
+  //2 Connexion WebSocket pour produire
+  let socketProducteur = new WebSocket('ws://localhost:8080/ws/match-stream?script=producteurCurrentMatch.py')
+  socketProducteur.onopen    = () => console.log('✅ WS connecté')
+  //socketProducteur.onmessage = e => { liveUpdate.value = e.data }
+  socketProducteur.onerror   = err => console.error('❌ WS erreur :', err)
+  socketProducteur.onclose   = () => console.log('🔌 WS fermé')
 
   // 3) Connexion WebSocket pour le live
-  socket = new WebSocket('ws://localhost:8080/ws/match-stream?script=producteurCurrentMatch.py')
+  let socket = new WebSocket('ws://localhost:8080/ws/match-stream?script=consumerCurrentMatch.py')
   socket.onopen    = () => console.log('✅ WS connecté')
   socket.onmessage = e => { liveUpdate.value = e.data }
   socket.onerror   = err => console.error('❌ WS erreur :', err)
