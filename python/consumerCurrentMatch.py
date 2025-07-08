@@ -29,4 +29,3 @@ while True:
             print("Error: {}".format(msg.error()))
     else:
         print(format(msg.value().decode("utf-8")))
-       

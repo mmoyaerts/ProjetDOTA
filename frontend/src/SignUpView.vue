@@ -38,11 +38,12 @@ async function onSubmit() {
     return
   }
   try {
+     console.log("je suis là");
     // Appel à /api/auth/register
-    await axios.post('http://localhost:8080/register', {
+    await axios.post('http://localhost:8080/users', {
       username: username.value,
       email:    email.value,
-      password: password.value
+      passwordHash: password.value
     })
     router.push({ name: 'Login' })
   } catch (err) {

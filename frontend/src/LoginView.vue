@@ -34,8 +34,11 @@ async function onSubmit() {
   try {
     // Appel à /api/auth/login
     const { data: token } = await axios.post('http://localhost:8080/login', {
-      username: email.value,
+      email: email.value,
       password: password.value
+    },
+    {
+      withCredentials: true
     })
     // Tu récupères ici le token ou la réponse renvoyée par ton service.verify()
     localStorage.setItem('jwt_token', token)
