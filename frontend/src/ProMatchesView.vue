@@ -6,33 +6,11 @@
       Aucun match trouvé pour ce joueur.
     </p>
 
-    <ul v-else class="game-list">
-      <li
-        v-for="pm in games"
-        :key="pm.id.matchId"
-        :class="['game-item', pm.win ? 'win' : 'lose']"
-      >
-        <div class="game-logo">
-          <img
-            :src="heroLogo(pm.hero.name)"
-            :alt="pm.hero.name"
-          />
-        </div>
-        <div class="game-info">
-          <span class="game-id">#{{ pm.id.matchId }}</span>
-          <span class="game-hero">{{ pm.hero.name }}</span>
-          <span class="game-kda">
-            KDA : {{ pm.kill }}/{{ pm.deaths }}/{{ pm.assists }}
-          </span>
-          <span class="game-duration">
-            Durée : {{ formatDuration(pm.match.duration) }}m
-          </span>
-        </div>
-        <div class="game-result">
-          {{ pm.win ? 'VICTOIRE' : 'DÉFAITE' }}
-        </div>
-      </li>
-    </ul>
+    <RecentMatches
+      v-if="playerId"
+      :account-id="playerId"
+      script-name="producteurRecentMatch.py"
+    />
   </div>
 </template>
 
@@ -40,18 +18,16 @@
 import { ref, onMounted } from 'vue'
 import { useRoute }    from 'vue-router'
 import axios           from 'axios'
+import RecentMatches   from './components/MatchHistory.vue'  // <- importe ton composant
 
-// (Proxy Vite déjà en place pour /playermatches → localhost:8080)
 const route      = useRoute()
 const playerId   = route.params.id
-
 const playerName = ref(`#${playerId}`)
 const games      = ref([])
 
 onMounted(async () => {
   if (!playerId) return
 
-  // 1) récupérer le pseudo du pro
   try {
     const proRes = await axios.get(`/pros/${playerId}`)
     playerName.value = proRes.data.pseudo
@@ -59,15 +35,12 @@ onMounted(async () => {
     console.error('Erreur récupération du pro :', err)
   }
 
-  // 2) récupérer les PlayerMatch récents
   try {
     const pmRes = await axios.get(`/playermatches/pro/${playerId}/recent`)
     const body = pmRes.data
-    games.value = Array.isArray(body.content)
-      ? body.content
-      : []
+    games.value = Array.isArray(body.content) ? body.content : []
   } catch (err) {
-    console.error('Erreur récupération des matchs du pro :', err)
+    console.error('Erreur récupération des matchs :', err)
     games.value = []
   }
 })
@@ -75,13 +48,11 @@ onMounted(async () => {
 function formatDuration(sec) {
   return Math.floor(sec / 60)
 }
-
 function heroLogo(name) {
-  return `/assets/heroes/${
-    name.toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-  }.png`
+  return `/assets/heroes/${name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')}.png`
 }
 </script>
 
