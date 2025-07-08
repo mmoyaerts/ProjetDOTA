@@ -15,4 +15,6 @@ public interface UserService {
     User ajouterUser(User user);
     //User patchUser(Long id, User user);
     void supprimerUser(Long id);
+
+    User findByEmail(String email);
 }
