@@ -140,4 +140,19 @@ INSERT INTO Heroes (id_heroes, name) VALUES
 (110, 'Phoenix'),
 (111, 'Oracle'),
 (112, 'Winter Wyvern'),
-(113, 'Arc Warden');
+(113, 'Arc Warden'),
+(114, 'Monkey King'),
+(119, 'Dark Willow'),
+(120, 'Pangolier'),
+(121, 'Grimstroke'),
+(123, 'Hoodwink'),
+(126, 'Void Spirit'),
+(128, 'Snapfire'),
+(129, 'Mars'),
+(131, 'Ringmaster'),
+(135, 'Dawnbreaker'),
+(136, 'Marci'),
+(137, 'Primal Beast'),
+(138, 'Muerta'),
+(145, 'Kez');
+
