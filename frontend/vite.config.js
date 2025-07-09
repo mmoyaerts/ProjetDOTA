@@ -11,8 +11,7 @@ export default defineConfig({
       // Si vous utilisez un proxy vers Spring Boot
       '/pros': {
         target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/pros/, '/pros')
+        changeOrigin: true
       },
       '/matches': {
         target: 'http://localhost:8080',

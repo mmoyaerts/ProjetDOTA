@@ -27,7 +27,6 @@ public class HeroController {
     @GetMapping("/{id}")
     @Operation(summary="Récupère un hero")
     public Hero getHero(@PathVariable Long id) {
-        System.out.println(id);
         return heroService.recupererHero(id);
     }
 }
