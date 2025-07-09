@@ -15,11 +15,6 @@ public class ProController {
 
     @Autowired
     private ProService proService;
-    
-    /*@Autowired
-    public ProController(ProService proService) {
-        this.proService = proService;
-    }*/
 
     @GetMapping({"", "/"})
     @Operation(summary="Récupère la liste de joueurs professionnels")
