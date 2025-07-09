@@ -210,6 +210,7 @@ async function fetchAllHeroes() {
       withCredentials: true
     })
     const list = res.data._embedded?.heroes || []
+    console.log(list)
     heroes.value = list.map(h => {
       const href = h._links?.self?.href || ''
       const id = h.id != null ? h.id : Number(href.split('/').pop())
@@ -288,9 +289,31 @@ function logout() { router.push({ name: 'Login' }) }
 .slot-owner { margin-top: .25rem; font-size: .75rem; color: #000 }
 .btn-import, .btn-send, .btn-cancel { font-size: .75rem; padding: .25rem .5rem; cursor: pointer; border: none }
 .btn-send { background: #374151; color: #fff; margin-top: 1rem }
-.modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center }
-.modal { background: #fff; padding: 1rem; border-radius: 8px; width: 320px; text-align: center }
-.modal-close { position: absolute; top: 8px; right: 8px; border: none; background: transparent; font-size: 1.25rem; cursor: pointer }
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  /* Agrandir la fenêtre */
+  width: 80vw;
+  max-width: 800px;
+  /* Limiter la hauteur et ajouter un ascenseur vertical */
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: center;
+  z-index: 1001;
+}.modal-close { position: absolute; top: 8px; right: 8px; border: none; background: transparent; font-size: 1.25rem; cursor: pointer }
 .hero-palette { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill,minmax(100px,1fr)); gap: .5rem; margin-top: 1rem }
 .palette-item { border: 1px solid #ccc; border-radius: 4px; padding: .5rem; cursor: pointer; display: flex; flex-direction: column; align-items: center }
 .palette-item img { width: 48px; height: 48px; margin-bottom: .25rem }

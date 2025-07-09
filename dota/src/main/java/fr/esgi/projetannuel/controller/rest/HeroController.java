@@ -21,6 +21,7 @@ public class HeroController {
     @GetMapping("/")
     @Operation(summary="Récupère liste d'heros")
     public List<Hero> getHeros() {
+        System.out.println(heroService.recupererHeros());
         return heroService.recupererHeros();
     }
 
