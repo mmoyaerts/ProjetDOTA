@@ -51,35 +51,38 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
-const route      = useRoute()
-const playerId   = route.params.id
+const route        = useRoute()
+const playerId     = route.params.id
+const token        = localStorage.getItem('jwt_token') || ''
 
-const proName       = ref('Nom inconnu')
+const proName      = ref('Chargement…')
 const recentMatches = ref([])
-const token = localStorage.getItem('jwt_token')
 
 let socket = null
 
 onMounted(async () => {
-  // 1) Charger uniquement le pseudo du pro
+  // 1) Charger le pseudo du pro
   try {
-    // Si ton backend mappe sous /api, fais `/api/pros/${playerId}`
     const res = await axios.get(
-            `/pros/${playerId}`,
-            { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-          )
+      `/pros/${playerId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true
+      }
+    )
     proName.value = res.data.pseudo
   } catch (err) {
-    console.error('Erreur récupération du pseudo du pro :', err)
+    console.error('❌ Impossible de récupérer le pro :', err)
+    proName.value = `#${playerId}`
   }
 
-  // 2) WS pour récupérer les matchs récents
+  // 2) Ouvrir la WS pour les matchs récents
   socket = new WebSocket(
     `ws://localhost:8080/ws/match-stream?script=producteurRecentMatch.py&accountId=${playerId}`
   )
-  socket.onopen = () => console.log('✅ WS match-stream connecté')
-  socket.onerror = err => console.error('❌ WS erreur :', err)
-  socket.onclose = () => console.log('🔌 WS fermé')
+  socket.onopen = () => console.log('✅ WS connectée')
+  socket.onerror = e => console.error('❌ WS erreur', e)
+  socket.onclose = () => console.log('🔌 WS fermée')
 
   socket.onmessage = async (e) => {
     let data
@@ -89,22 +92,26 @@ onMounted(async () => {
       return
     }
 
-    // On récupère aussi le nom de chaque héros
+    // 3) Pour chaque match, récupérer le nom du héros
     const withNames = await Promise.all(
       data.map(async m => {
-        let name = `Héros ${m.hero_id}`
+        let heroName = `Héros ${m.hero_id}`
         try {
           const r = await axios.get(
             `/heroes/${m.hero_id}`,
-            { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true
+            }
           )
-          name = r.data.name
-        } catch (e) {
-          console.error(`Erreur héros ${m.hero_id}:`, e)
+          heroName = r.data.name
+        } catch {
+          console.warn(`Échec chargement héros #${m.hero_id}`)
         }
-        return { ...m, heroName: name }
+        return { ...m, heroName }
       })
     )
+
     recentMatches.value = withNames
   }
 })
@@ -117,6 +124,7 @@ function formatDuration(sec) {
   return Math.floor(sec / 60)
 }
 </script>
+
 
 <style scoped>
 .container {
