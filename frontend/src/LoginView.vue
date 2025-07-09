@@ -41,7 +41,7 @@ async function onSubmit() {
       withCredentials: true
     })
     // Tu récupères ici le token ou la réponse renvoyée par ton service.verify()
-    localStorage.setItem('jwt_token', token)
+    localStorage.setItem('jwt_token', token.token)
     router.push({ name: 'Dashboard' })
   } catch (err) {
     error.value = err.response?.data || 'Erreur de connexion'

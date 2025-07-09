@@ -137,7 +137,15 @@ let liveSocket = null
 onMounted(async () => {
   // Liste des pros
   try {
-    const res = await axios.get('http://localhost:8080/pros', { withCredentials: true })
+  const token = localStorage.getItem('jwt_token') // récupère le token JWT
+
+  const res = await axios.get('http://localhost:8080/pros', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    withCredentials: true
+  })
+
     pros.value = res.data.map(p => ({ id: p.idSteam, name: p.pseudo }))
   } catch (e) {
     console.error('❌ Erreur récupération des pros :', e)
