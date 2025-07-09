@@ -64,7 +64,7 @@ onMounted(async () => {
   // 1) Charger le pseudo du pro
   try {
     const res = await axios.get(
-      `/pros/${playerId}`,
+      `http://localhost:8080/pros/${playerId}`,
       {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
