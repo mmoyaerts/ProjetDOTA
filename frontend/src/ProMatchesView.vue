@@ -1,5 +1,8 @@
 <template>
   <div class="container">
+    <!-- Titre dynamique -->
+    <h1 class="title">Historique du pro {{ proName }}</h1>
+
     <section class="recent-section">
       <div class="table-wrapper" v-if="recentMatches.length">
         <table class="recent-table">
@@ -48,48 +51,75 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
-const route = useRoute()
-const playerId = route.params.id
+const route      = useRoute()
+const playerId   = route.params.id
+const token = localStorage.getItem('jwt_token')
 
+// État
+const proName       = ref('…')
 const recentMatches = ref([])
+
 let socket = null
 
 onMounted(async () => {
+  // 1) Charger le nom du pro
+  try {
+      const res = await axios.get(
+            `http://localhost:8080/heroes/${m.hero_id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true
+            }
+          )
+    proName.value = res.data.pseudo || res.data.name || `#${playerId}`
+  } catch (err) {
+    console.error('Erreur récupération du pro :', err)
+    proName.value = `#${playerId}`
+  }
+
+  // 2) Ouvrir le WebSocket pour les matchs récents
   socket = new WebSocket(
     `ws://localhost:8080/ws/match-stream?script=producteurRecentMatch.py&accountId=${playerId}`
   )
-  socket.onmessage = async e => {
+  socket.onopen = () => console.log('✅ WS match-stream connecté')
+  socket.onerror = err => console.error('❌ WS erreur :', err)
+  socket.onclose = () => console.log('🔌 WS fermé')
+
+  socket.onmessage = async (e) => {
     let data
     try {
       data = JSON.parse(e.data)
     } catch {
+      console.warn('Donnée WS non JSON:', e.data)
       return
     }
-    const token = localStorage.getItem('jwt_token')
 
+    // Récupère le nom du héros pour chaque match
     const withNames = await Promise.all(
       data.map(async m => {
         let name = `Héros ${m.hero_id}`
         try {
-          const res = await axios.get(`http://localhost:8080/heroes/${m.hero_id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            withCredentials: true // si ton backend attend les cookies aussi
-          })
+          const res = await axios.get(
+            `http://localhost:8080/heroes/${m.hero_id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true
+            }
+          )
           name = res.data.name
         } catch (e) {
-          console.error(`Erreur récupération du héros ${m.hero_id}`, e)
+          console.error(`Erreur héros ${m.hero_id}:`, e)
         }
         return { ...m, heroName: name }
       })
     )
+
     recentMatches.value = withNames
   }
 })
 
 onBeforeUnmount(() => {
-  socket && socket.close()
+  if (socket) socket.close()
 })
 
 function formatDuration(sec) {
@@ -103,6 +133,13 @@ function formatDuration(sec) {
   margin: 2rem auto;
   padding: 0 1rem;
   color: #111;
+}
+
+/* Titre */
+.title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 /* wrapper défilable avec arrondis + ombre */
