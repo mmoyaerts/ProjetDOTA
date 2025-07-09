@@ -8,11 +8,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-// const props = defineProps({
-//   accountId: { type: String, required: true },
-//   scriptName: { type: String, required: true }
-// })
-
 const output = ref('')
 const idTest = '365939353'
 const nomProduceur = 'producteurRecentMatch.py'

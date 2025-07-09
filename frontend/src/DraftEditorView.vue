@@ -184,22 +184,24 @@ function updateDraftFromMatch(data) {
   bansDire.value    = data.dire_bans.slice(0,7)
   const playersRad = data.players.filter(p => p.team === 'Radiant').slice(0,5)
   const playersDi  = data.players.filter(p => p.team === 'Dire').slice(0,5)
-  data.radiant_picks.slice(0,5).forEach((id,i) => {
-    slotsRadiant.value[i] = {
-      id,
-      name: heroName(id),
-      winrate: randomWinrate(),
-      playerName: playersRad[i]?.name || ''
-    }
-  })
-  data.dire_picks.slice(0,5).forEach((id,i) => {
-    slotsDire.value[i] = {
-      id,
-      name: heroName(id),
-      winrate: randomWinrate(),
-      playerName: playersDi[i]?.name || ''
-    }
-  })
+data.radiant_picks.slice(0,5).forEach((id,i) => {
+  if (slotsRadiant.value[i].id !== id) {
+    slotsRadiant.value[i].winrate = randomWinrate()
+  }
+  slotsRadiant.value[i].id         = id
+  slotsRadiant.value[i].name       = heroName(id)
+  slotsRadiant.value[i].playerName = playersRad[i]?.name || ''
+})
+data.dire_picks.slice(0,5).forEach((id,i) => {
+  if (slotsDire.value[i].id !== id) {
+    slotsDire.value[i].winrate = randomWinrate()
+  }
+  slotsDire.value[i].id         = id
+  slotsDire.value[i].name       = heroName(id)
+  slotsDire.value[i].playerName = playersDi[i]?.name || ''
+})
+
+
 }
 
 // Fetch heroes
@@ -305,10 +307,8 @@ function logout() { router.push({ name: 'Login' }) }
   background: #fff;
   padding: 1rem;
   border-radius: 8px;
-  /* Agrandir la fenêtre */
   width: 80vw;
   max-width: 800px;
-  /* Limiter la hauteur et ajouter un ascenseur vertical */
   max-height: 80vh;
   overflow-y: auto;
   text-align: center;

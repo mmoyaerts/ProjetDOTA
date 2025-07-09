@@ -39,7 +39,6 @@ async function onSubmit() {
   }
   try {
      console.log("je suis là");
-    // Appel à /api/auth/register
     await axios.post('http://localhost:8080/users', {
       username: username.value,
       email:    email.value,

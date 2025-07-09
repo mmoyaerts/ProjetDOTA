@@ -25,7 +25,6 @@
       <p v-if="!filteredPros.length" class="no-pros">Aucun pro trouvé…</p>
     </section>
 
-    <!-- ================== Option 3: Flux live WebSocket ================== -->
     <section class="live-section">
       <h2>Matchs live</h2>
       <div class="table-wrapper" v-if="liveMatches.length">
@@ -142,7 +141,6 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${token}` },
       withCredentials: true
     })
-    // Adaptation aux attributs de l'entité Pro
     pros.value = res.data.map(p => ({
       idSteam: p.idSteam,
       pseudo: p.pseudo,
@@ -197,10 +195,6 @@ function goToDraftWithMatch(match) {
   })
 }
 
-// Avatar helper
-function getAvatar(idSteam) {
-  return `/avatars/${idSteam}.png`
-}
 </script>
 
 <style scoped>

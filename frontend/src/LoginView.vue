@@ -32,7 +32,6 @@ const router = useRouter()
 async function onSubmit() {
   error.value = ''
   try {
-    // Appel à /api/auth/login
     const { data: token } = await axios.post('http://localhost:8080/login', {
       email: email.value,
       password: password.value
@@ -40,7 +39,6 @@ async function onSubmit() {
     {
       withCredentials: true
     })
-    // Tu récupères ici le token ou la réponse renvoyée par ton service.verify()
     localStorage.setItem('jwt_token', token.token)
     router.push({ name: 'Dashboard' })
   } catch (err) {

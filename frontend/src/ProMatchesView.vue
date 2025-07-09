@@ -4,7 +4,6 @@
   </router-link>
   <div class="">
 
-    <!-- Titre dynamique centré -->
     <h1>Historique du pro {{ proName }}</h1>
 
     <section class="recent-section">
@@ -64,11 +63,10 @@ const recentMatches = ref([])
 let socket = null
 
 function goBack() {
-  route.back()   // ou router.go(-1)
+  route.back()
 }
 
 onMounted(async () => {
-  // Charger le pseudo du pro
   try {
     const res = await axios.get(
       `http://localhost:8080/pros/${playerId}`,
@@ -86,7 +84,6 @@ onMounted(async () => {
   socket.onmessage = async (e) => {
     let data
     try { data = JSON.parse(e.data) } catch { return }
-    // Récupérer nom du héros pour chaque match
     const withNames = await Promise.all(
       data.map(async m => {
         let heroName = `Héros ${m.hero_id}`
@@ -121,7 +118,6 @@ function formatDuration(sec) { return Math.floor(sec / 60) }
   border-radius: 4px;
   cursor: pointer;
 }
-/* Titre centré */
 h1 {
   width: 100%;
   text-align: center;
