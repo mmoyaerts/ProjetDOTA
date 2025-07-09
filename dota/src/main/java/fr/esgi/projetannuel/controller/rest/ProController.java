@@ -13,12 +13,13 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class ProController {
 
-    private final ProService proService;
-
     @Autowired
+    private ProService proService;
+    
+    /*@Autowired
     public ProController(ProService proService) {
         this.proService = proService;
-    }
+    }*/
 
     @GetMapping({"", "/"})
     @Operation(summary="Récupère la liste de joueurs professionnels")

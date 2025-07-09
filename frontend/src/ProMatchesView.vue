@@ -65,13 +65,22 @@ onMounted(async () => {
     } catch {
       return
     }
+    const token = localStorage.getItem('jwt_token')
+
     const withNames = await Promise.all(
       data.map(async m => {
         let name = `Héros ${m.hero_id}`
         try {
-          const res = await axios.get(`/heroes/${m.hero_id}`)
+          const res = await axios.get(`http://localhost:8080/heroes/${m.hero_id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            withCredentials: true // si ton backend attend les cookies aussi
+          })
           name = res.data.name
-        } catch {}
+        } catch (e) {
+          console.error(`Erreur récupération du héros ${m.hero_id}`, e)
+        }
         return { ...m, heroName: name }
       })
     )
