@@ -9,6 +9,9 @@ import fr.esgi.projetannuel.repository.TeamRepository;
 import fr.esgi.projetannuel.service.HeroService;
 import fr.esgi.projetannuel.service.ProService;
 import lombok.AllArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
@@ -30,11 +33,17 @@ public class AjoutDonneesInitiale {
     @EventListener(ApplicationReadyEvent.class)
     // public void run(String... args) throws Exception {
     public void init() {
+
         try {
-            Pro pro = proService.recupererPro(365939353L);
-            System.out.println("Pro trouvé : " + pro.getPseudo());
+            List<Pro> pros = proRepository.findAll();
+
+            System.out.println("Pro trouvé : " + pros);
         } catch (Exception e) {
+            
+            List<Pro> pros =proRepository.findAll();
+
             System.out.println("Une erreur est survenue : " + e.getMessage());
+            System.out.println(pros);
         }
     }
 
