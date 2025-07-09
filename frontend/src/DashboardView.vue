@@ -134,10 +134,11 @@ const liveMatches = ref([])
 let prodSocket = null
 let liveSocket = null
 
+const token = localStorage.getItem('jwt_token') // récupère le token JWT
+
 onMounted(async () => {
   // Liste des pros
   try {
-  const token = localStorage.getItem('jwt_token') // récupère le token JWT
 
   const res = await axios.get('http://localhost:8080/pros', {
     headers: {

@@ -110,9 +110,9 @@ public class MatchWebSocketHandler extends TextWebSocketHandler {
             scriptName = "test.py";
         }
 
-        Path scriptPath = Paths.get("python", scriptName).toAbsolutePath();
+        //Path scriptPath = Paths.get("python", scriptName).toAbsolutePath();
         //Path scriptPath = Paths.get(System.getProperty("user.dir"), "python", scriptName).toAbsolutePath();
-        //Path scriptPath = Paths.get("..", "python", scriptName).normalize().toAbsolutePath();
+        Path scriptPath = Paths.get("..", "python", scriptName).normalize().toAbsolutePath();
 
 
 

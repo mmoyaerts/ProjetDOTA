@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()*/
                         .requestMatchers(new AntPathRequestMatcher("/users", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/login", "POST")).permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 /*.formLogin((form) -> form.disable())
