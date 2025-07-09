@@ -113,11 +113,6 @@ function formatDuration(sec) { return Math.floor(sec / 60) }
 </script>
 
 <style scoped>
-.container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
 
 .btn-back {
   padding: 0.5rem 1rem;
@@ -144,6 +139,7 @@ h1 {
 
 .recent-table {
   width: 100%;
+  height : 100%;
   border-collapse: separate;
   border-spacing: 0 15px;
 }

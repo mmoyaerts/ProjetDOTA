@@ -173,8 +173,7 @@ const radiantTeamWinrate = computed(() => {
   return arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0
 })
 const direTeamWinrate = computed(() => {
-  const arr = slotsDire.value.map(s => s.winrate)
-  return arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0
+  return 100 - radiantTeamWinrate.value
 })
 
 // Update draft from live
