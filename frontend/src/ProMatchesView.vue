@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Titre dynamique avec uniquement le pseudo -->
-    <h1 class="title">Historique du pro {{ proName }}</h1>
+    <h1>Historique du pro {{ proName }}</h1>
 
     <section class="recent-section">
       <div class="table-wrapper" v-if="recentMatches.length">
@@ -133,10 +133,8 @@ function formatDuration(sec) {
   padding: 0 1rem;
   color: #111;
 }
-.title {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+h1 {
+  color : white;
 }
 .table-wrapper {
   border-radius: 8px;
@@ -189,7 +187,6 @@ function formatDuration(sec) {
   height: 72px;
   object-fit: contain;
   border-radius: 4px;
-  background: #f9f9f9;
   border: 1px solid #eee;
 }
 .hero-name {

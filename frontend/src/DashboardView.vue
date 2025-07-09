@@ -227,7 +227,12 @@ function formatDuration(sec) {
 .players-list li { display:flex; align-items:center; margin-bottom:4px; }
 .no-matches { margin-top:1rem; color:#888; font-style:italic; }
 
-
+h1 {
+  color: white;
+}
+h2 {
+  color : white;
+}
 .dashboard-container {
   padding: 1rem;
   max-width: 1200px;

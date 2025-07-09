@@ -1,75 +1,133 @@
 <template>
   <div class="editor-container">
     <header class="editor-header">
-      <h1>Éditeur de Draft</h1>
+      <h1>Éditeur de Draft pour {{ proName }}</h1>
       <div class="top-buttons">
         <button @click="logout" class="btn-logout small-btn">Déconnexion</button>
       </div>
     </header>
 
+    <!-- Radiant -->
     <section class="team-section radiant">
-      <h2>RADIANT</h2>
+      <h2>{{ radiantTeamName }}</h2>
+      <!-- Bans -->
+      <div class="bans">
+        <img
+          v-for="bid in bansRadiant"
+          :key="bid"
+          :src="`/heroes/${bid}.png`"
+          class="ban-icon"
+          :title="`Ban ID ${bid}`"
+        />
+      </div>
       <div class="slots">
-        <div v-for="(slot, idx) in slotsRadiant" :key="idx" class="hero-slot">
+        <div
+          v-for="(slot, idx) in slotsRadiant"
+          :key="idx"
+          class="hero-slot"
+        >
           <div class="slot-border">
             <div class="slot-content">
-              <template v-if="slot.hero">
-                <img :src="heroLogo(slot.hero)" class="slot-image" />
-                <p class="slot-label">{{ slot.hero }} ({{ slot.winrate }}%)</p>
+              <template v-if="slot.id !== null">
+                <img
+                  :src="`/heroes/${slot.id}.png`"
+                  :alt="slot.name"
+                  class="slot-image"
+                />
+                <div class="slot-info">
+                  <span class="slot-name">{{ slot.name }}</span>
+                  <span class="slot-winrate">({{ slot.winrate }} %)</span>
+                </div>
               </template>
               <button
                 v-else
                 @click="openModal('Radiant', idx)"
                 class="btn-import small-btn"
+                v-if="!matchId"
               >
-                Importer Héro
+                Importer Héros
               </button>
             </div>
           </div>
-          <p class="slot-label">HÉROS {{ idx + 1 }}</p>
+          <p class="slot-owner">{{ slot.playerName }}</p>
         </div>
       </div>
     </section>
 
+    <!-- Dire -->
     <section class="team-section dire">
-      <h2>DIRE</h2>
+      <h2>{{ direTeamName }}</h2>
+      <!-- Bans -->
+      <div class="bans">
+        <img
+          v-for="bid in bansDire"
+          :key="bid"
+          :src="`/heroes/${bid}.png`"
+          class="ban-icon"
+          :title="`Ban ID ${bid}`"
+        />
+      </div>
       <div class="slots">
-        <div v-for="(slot, idx) in slotsDire" :key="idx" class="hero-slot">
+        <div
+          v-for="(slot, idx) in slotsDire"
+          :key="idx"
+          class="hero-slot"
+        >
           <div class="slot-border">
             <div class="slot-content">
-              <template v-if="slot.hero">
-                <img :src="heroLogo(slot.hero)" class="slot-image" />
-                <p class="slot-label">{{ slot.hero }} ({{ slot.winrate }}%)</p>
+              <template v-if="slot.id !== null">
+                <img
+                  :src="`/heroes/${slot.id}.png`"
+                  :alt="slot.name"
+                  class="slot-image"
+                />
+                <div class="slot-info">
+                  <span class="slot-name">{{ slot.name }}</span>
+                  <span class="slot-winrate">({{ slot.winrate }} %)</span>
+                </div>
               </template>
               <button
                 v-else
                 @click="openModal('Dire', idx)"
                 class="btn-import small-btn"
+                v-if="!matchId"
               >
-                Importer Héro
+                Importer Héros
               </button>
             </div>
           </div>
-          <p class="slot-label">HÉROS {{ idx + 1 }}</p>
+          <p class="slot-owner">{{ slot.playerName }}</p>
         </div>
       </div>
     </section>
 
-    <button @click="sendDraft" class="btn-send small-btn">Envoyer à l'IA</button>
+    <button @click="sendDraft" class="btn-send small-btn">Envoyer à l’IA</button>
 
-    <!-- Modal d’import manuel -->
+    <!-- Modal de sélection de héros -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h3>Sélectionner un héros ({{ currentTeam }} slot {{ currentSlot+1 }})</h3>
+        <h3>Sélectionner un héros ({{ currentTeam }} slot {{ currentSlot + 1 }})</h3>
         <select v-model="selectedHero">
           <option disabled value="">-- Choisissez un héros --</option>
-          <option v-for="hero in availableHeroes" :key="hero" :value="hero">
-            {{ hero }}
+          <option v-for="name in availableHeroes" :key="name" :value="name">
+            {{ name }}
           </option>
         </select>
         <div class="modal-actions">
           <button @click="confirmImport" class="btn-confirm small-btn">Valider</button>
-          <button @click="closeModal"   class="btn-cancel small-btn">Annuler</button>
+          <button @click="closeModal" class="btn-cancel small-btn">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup résumé winrates -->
+    <div v-if="showSummary" class="modal-backdrop">
+      <div class="modal">
+        <h3>Résumé IA</h3>
+        <p>Winrate Radiant : {{ radiantSummary }} %</p>
+        <p>Winrate Dire    : {{ direSummary }} %</p>
+        <div class="modal-actions">
+          <button @click="closeSummary" class="btn-cancel small-btn">Fermer</button>
         </div>
       </div>
     </div>
@@ -77,130 +135,193 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import axios from 'axios'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, useRoute }            from 'vue-router'
+import axios                              from 'axios'
 
-const router = useRouter()
-const route  = useRoute()
-const matchId       = route.params.matchId
-const initialMatch  = route.state?.match
+// --- Router & params ---
+const router  = useRouter()
+const route   = useRoute()
+const proId   = route.params.proId
+const matchId = route.params.matchId ? Number(route.params.matchId) : null
+const token   = localStorage.getItem('jwt_token') || ''
 
-// Liste de héros statique (ou à charger via REST)
-const heroes = ref([
-  { id: 1, name: 'Invoker' },
-  { id: 2, name: 'Pudge' },
-  { id: 3, name: 'Phantom Assassin' },
-  { id: 4, name: 'Snapfire' },
-  { id: 5, name: 'Earthshaker' },
-])
-
-// Draft slots
-const slotsRadiant = ref(Array(5).fill().map(() => ({ hero:'', winrate:null })))
-const slotsDire    = ref(Array(5).fill().map(() => ({ hero:'', winrate:null })))
+// --- State ---
+const proName         = ref('…')
+const heroes          = ref([])
+const slotsRadiant    = ref(Array(5).fill().map(() => ({ id: null, name: '', winrate: 0, playerName: '' })))
+const slotsDire       = ref(Array(5).fill().map(() => ({ id: null, name: '', winrate: 0, playerName: '' })))
+const playersRadiant  = ref([])
+const playersDire     = ref([])
+const bansRadiant     = ref([])
+const bansDire        = ref([])
+const radiantTeamName = ref('Radiant')
+const direTeamName    = ref('Dire')
 
 const showModal    = ref(false)
 const currentTeam  = ref('')
 const currentSlot  = ref(0)
 const selectedHero = ref('')
 
-// Filtre des héros non pris
+const showSummary    = ref(false)
+const radiantSummary = ref(0)
+const direSummary    = ref(0)
+
+// --- Helpers ---
+function randomWinrate() {
+  return Math.floor(Math.random() * 101)
+}
+function heroName(id) {
+  const h = heroes.value.find(h => h.id === id)
+  return h ? h.name : `ID ${id}`
+}
+
+// --- Computed pour sélection manuelle ---
 const availableHeroes = computed(() => {
-  const taken = (currentTeam.value === 'Radiant'
-    ? slotsRadiant.value
-    : slotsDire.value
-  ).map(s => s.hero).filter(Boolean)
+  const taken = (currentTeam.value === 'Radiant' ? slotsRadiant.value : slotsDire.value)
+    .map(s => s.name)
+    .filter(Boolean)
   return heroes.value.map(h => h.name).filter(n => !taken.includes(n))
 })
 
-// Met à jour les slots d’après un objet match
-function updateDraftFromMatch(data) {
-  if (data.radiant_picks) {
-    data.radiant_picks.slice(0,5).forEach((id,i) => {
-      slotsRadiant.value[i] = { hero: heroName(id), winrate: null }
+// --- Chargement de tous les héros ---
+async function fetchAllHeroes() {
+  try {
+    const res = await axios.get('http://localhost:8080/heroes', {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true
     })
-  }
-  if (data.dire_picks) {
-    data.dire_picks.slice(0,5).forEach((id,i) => {
-      slotsDire.value[i] = { hero: heroName(id), winrate: null }
+    const embedded = res.data._embedded
+    heroes.value = embedded.heroes.map(h => {
+      const href = h._links.self.href
+      const id   = parseInt(href.split('/').pop(), 10)
+      return { id, name: h.name }
     })
+  } catch (e) {
+    console.error('Erreur chargement héros :', e)
   }
 }
 
+// --- Chargement du pro via son ID ---
+async function fetchPro(id) {
+  try {
+    const res = await axios.get(`http://localhost:8080/pros/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true
+    })
+    proName.value = res.data.pseudo
+  } catch (e) {
+    console.error('Erreur chargement pro :', e)
+  }
+}
+
+// --- Mise à jour des slots, bans et joueurs à partir du match ---
+function updateDraftFromMatch(data) {
+  // équipes
+  radiantTeamName.value = data.radiant_team.team_name
+  direTeamName.value    = data.dire_team.team_name
+  // bans
+  bansRadiant.value = data.radiant_bans.slice(0,7)
+  bansDire.value    = data.dire_bans.slice(0,7)
+  // joueurs
+  playersRadiant.value = data.players.filter(p => p.team === 'Radiant').slice(0,5)
+  playersDire.value    = data.players.filter(p => p.team === 'Dire').slice(0,5)
+  // picks
+  data.radiant_picks.slice(0,5).forEach((id, i) => {
+    slotsRadiant.value[i] = {
+      id,
+      name: heroName(id),
+      winrate: randomWinrate(),
+      playerName: playersRadiant.value[i]?.name || ''
+    }
+  })
+  data.dire_picks.slice(0,5).forEach((id, i) => {
+    slotsDire.value[i] = {
+      id,
+      name: heroName(id),
+      winrate: randomWinrate(),
+      playerName: playersDire.value[i]?.name || ''
+    }
+  })
+}
+
+// --- WebSockets producer & consumer ---
+let producerSocket = null
+let consumerSocket = null
+
 onMounted(async () => {
-  if (initialMatch) {
-    // on a reçu l’objet complet via route.state
-    updateDraftFromMatch(initialMatch)
-  } else {
-    // fallback REST si on a seulement l’ID
+  await fetchAllHeroes()
+  producerSocket = new WebSocket(`ws://localhost:8080/ws/match-stream?script=producteurCurrentMatch.py`)
+  consumerSocket = new WebSocket(`ws://localhost:8080/ws/match-stream?script=consumerCurrentMatch.py`)
+  consumerSocket.onmessage = evt => {
     try {
-      const res = await axios.get(`http://localhost:8080/matches/${matchId}`)
-      updateDraftFromMatch(res.data)
-    } catch (e) {
-      console.error('❌ Erreur chargement match via REST :', e)
+      const data = JSON.parse(evt.data)
+      const msg = Array.isArray(data)
+        ? data.find(m => m.match_id === matchId)
+        : data.match_id === matchId && data
+      if (msg) updateDraftFromMatch(msg)
+    } catch (err) {
+      console.warn('Erreur parsing WS :', err)
     }
   }
 })
 
-// Modal & interactions
+onBeforeUnmount(() => {
+  producerSocket?.close()
+  consumerSocket?.close()
+})
+
+// --- UI Actions ---
 function openModal(team, idx) {
-  currentTeam.value  = team
-  currentSlot.value  = idx
-  selectedHero.value = ''
-  showModal.value    = true
+  currentTeam.value   = team
+  currentSlot.value   = idx
+  selectedHero.value  = ''
+  showModal.value     = true
 }
-function closeModal() {
-  showModal.value = false
-}
+function closeModal() { showModal.value = false }
 function confirmImport() {
-  if (!selectedHero.value) return
-  const winrate = Math.floor(Math.random()*101)
-  const slotObj = { hero: selectedHero.value, winrate }
-  if (currentTeam.value==='Radiant') slotsRadiant.value[currentSlot.value]=slotObj
-  else                               slotsDire.value[ currentSlot.value]=slotObj
+  const heroObj = heroes.value.find(h => h.name === selectedHero.value)
+  if (!heroObj) return
+  const slot = { id: heroObj.id, name: heroObj.name, winrate: randomWinrate(), playerName: proName.value }
+  if (currentTeam.value === 'Radiant') slotsRadiant.value[currentSlot.value] = slot
+  else slotsDire.value[currentSlot.value] = slot
   closeModal()
 }
-function sendDraft() {
-  console.log('Draft envoyé →', {
-    Radiant: slotsRadiant.value,
-    Dire:    slotsDire.value
-  })
-}
-function logout() {
-  router.push({ name: 'Login' })
-}
 
-// Helpers pour nom et icône
-function heroName(id) {
-  const h = heroes.value.find(h=>h.id===id)
-  return h ? h.name : `ID ${id}`
+function sendDraft() {
+  radiantSummary.value = slotsRadiant.value.reduce((s, x) => s + x.winrate, 0)
+  direSummary.value    = slotsDire.value.reduce((s, x) => s + x.winrate, 0)
+  showSummary.value    = true
 }
-function heroLogo(name) {
-  return `/assets/heroes/${name.toLowerCase().replace(/\s+/g,'-')}.png`
-}
+function closeSummary() { showSummary.value = false }
+
+function logout() { router.push({ name: 'Login' }) }
 </script>
 
 <style scoped>
-.editor-container { padding:1rem; background:#f3f4f6; min-height:100vh; }
-.editor-header { display:flex; align-items:center; margin-bottom:1.5rem; }
-.editor-header h1 { flex:1; text-align:center; }
-.top-buttons { display:flex; gap:.5rem; }
-.btn-logout { background:#ef4444; color:#fff; border:none; cursor:pointer; }
-
-/* Sections Radiant / Dire */
-.team-section { border:2px solid #9ca3af; padding:1rem; margin-bottom:1rem; }
-.slots { display:flex; gap:.5rem; }
-.hero-slot { flex:1; text-align:center; }
-.slot-border { border:2px dashed #6b7280; height:150px; display:flex; justify-content:center; align-items:center; }
-.slot-image { width:50px; height:50px; border-radius:4px; }
-.slot-label { margin-top:.5rem; font-size:.75rem; }
-.btn-import, .btn-confirm, .btn-cancel, .btn-send { font-size:.75rem; padding:.25rem .5rem; cursor:pointer; }
-.btn-send { background:#374151; color:#fff; border:none; margin-top:1rem; }
-
-/* Modal */
-.modal-backdrop { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; }
-.modal { background:#fff; padding:1rem; border-radius:8px; width:280px; }
-.modal-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
-.btn-confirm { background:#10b981; color:#fff; border:none; }
-.btn-cancel  { background:#ef4444; color:#fff; border:none; }
+.editor-container { padding: 1rem; background: #f3f4f6; min-height: 100vh; color: #000; }
+.editor-header { display: flex; align-items: center; margin-bottom: 1.5rem; }
+.editor-header h1 { flex: 1; text-align: center; }
+.top-buttons .small-btn { color: #fff !important; }
+.team-section { border: 2px solid #9ca3af; padding: 1rem; margin-bottom: 1rem; }
+.team-section.radiant { border-color: #3b82f6; }
+.team-section.dire    { border-color: #ef4444; }
+.team-section h2     { color: #000; }
+.bans { display: flex; gap: 4px; margin-bottom: 0.5rem; }
+.ban-icon { width: 24px; height: 24px; border-radius: 4px; cursor: help; }
+.slots { display: flex; gap: 0.5rem; }
+.hero-slot { flex: 1; text-align: center; }
+.slot-border { border: 2px dashed #6b7280; height: 150px; display: flex; align-items: center; justify-content: center; }
+.slot-image { width: 50px; height: 50px; border-radius: 4px; }
+.slot-info { margin-top: 0.5rem; }
+.slot-name { font-weight: bold; }
+.slot-winrate { font-size: 0.85rem; color: #555; }
+.slot-owner { margin-top: 0.5rem; color: #000; font-size: 0.75rem; }
+.btn-import, .btn-confirm, .btn-cancel, .btn-send { font-size: 0.75rem; padding: 0.25rem 0.5rem; cursor: pointer; }
+.btn-send { background: #374151; color: #fff; border: none; margin-top: 1rem; }
+.modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+.modal { background: #fff; padding: 1rem; border-radius: 8px; width: 300px; color: #000; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+.btn-confirm { background: #10b981; color: #fff; border: none; }
+.btn-cancel  { background: #ef4444; color: #fff; border: none; }
 </style>
