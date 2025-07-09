@@ -9,10 +9,6 @@ export default defineConfig({
   server: {
     proxy: {
       // Si vous utilisez un proxy vers Spring Boot
-      '/pros': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
-      },
       '/matches': {
         target: 'http://localhost:8080',
         changeOrigin: true
