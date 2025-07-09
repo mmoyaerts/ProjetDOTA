@@ -25,6 +25,7 @@ public class ProController {
     @GetMapping("/{id}")
     @Operation(summary="Récupère un joueur professionnel par son ID")
     public Pro getProById( @PathVariable Long id) {
+        System.out.println(id);
         return proService.recupererPro(id);
     }
 }
