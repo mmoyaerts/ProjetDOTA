@@ -13,7 +13,6 @@
       <p v-if="error" style="color: #f87171; text-align: center;">{{ error }}</p>
       <div class="link-group">
         <router-link to="/signup">Créer un compte</router-link>
-        <router-link to="/">Mot de passe oublié?</router-link>
       </div>
     </div>
   </div>
