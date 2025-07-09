@@ -131,7 +131,7 @@ function formatDuration(sec) {
   max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
-  color: #111;
+  color: white;
 }
 .title {
   text-align: center;
