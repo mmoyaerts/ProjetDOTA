@@ -38,10 +38,12 @@ Elle permet :
     docker-compose up --build -d
 
 3. Lancer le back :
+    ```
     cd dota
     ./mvnw spring-boot:run
 
 4. Accéder à l'application :
+    ```
     http://localhost:5173
 
 
