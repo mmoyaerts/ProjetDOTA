@@ -48,13 +48,16 @@ def formaterEnvoyer():
         players = match.get("players", [])
         players_data = []
         for player in players:
-            player_info = {
-                'account_id': player.get("account_id", None),
-                'name': player.get("name", None),
-                'hero_id': player.get("hero_id", 0),
-                'team': "Radiant" if player.get("team") == 0 else "Dire"
-            }
-            players_data.append(player_info)
+            if player.get("name")=="FACEIT.com":
+                continue
+            else :
+                player_info = {
+                    'account_id': player.get("account_id", None),
+                    'name': player.get("name", None),
+                    'hero_id': player.get("hero_id", 0),
+                    'team': "Radiant" if player.get("team") == 0 else "Dire"
+                }
+                players_data.append(player_info)
 
         match_data['players'] = players_data
 

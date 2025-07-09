@@ -109,7 +109,6 @@ public class MatchWebSocketHandler extends TextWebSocketHandler {
         } else {
             scriptName = "test.py";
         }
-        System.out.println("Démarrage du script : " + scriptName);
 
         Path scriptPath = Paths.get("python", scriptName).toAbsolutePath();
         //Path scriptPath = Paths.get(System.getProperty("user.dir"), "python", scriptName).toAbsolutePath();
@@ -124,6 +123,16 @@ public class MatchWebSocketHandler extends TextWebSocketHandler {
         if (accountId != null) {
             command.add(accountId);
         }
+        /*List<String> command = new ArrayList<>();
+        command.add("docker");
+        command.add("exec");
+        command.add("python"); // nom du conteneur
+        command.add("python");
+        command.add("/app/" + scriptName); // chemin dans le conteneur
+        if (!accountId.isEmpty()) {
+            command.add(accountId);
+        }*/
+        System.out.println("Démarrage du script : " + command);
 
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.redirectErrorStream(true);
